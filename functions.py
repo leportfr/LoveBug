@@ -13,8 +13,8 @@ class LoveBug():
         self.client = opc.Client('localhost:7890')
         
         #load video files
-        self.vidcap = cv2.VideoCapture('./Movies/free-loops_Color_Heart_Pop_Up_H264.mp4')
-        self.vidcapBack = cv2.VideoCapture('./Movies/free-loops_Valentine_Heart_Outline_Chromatic_H264.mp4')
+        self.vidcap = cv2.VideoCapture('../Movies/free-loops_Color_Heart_Pop_Up_H264.mp4')
+        self.vidcapBack = cv2.VideoCapture('../Movies/free-loops_Valentine_Heart_Outline_Chromatic_H264.mp4')
 
         #load strip lens
         self.shellStripLens = np.loadtxt("./ShellStripLens.csv",delimiter=',').astype(int)
