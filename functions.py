@@ -71,22 +71,27 @@ class LoveBug():
         gray = [(125,125,125)]
         
         print('building pixels')
-        colors = black*512*0 + white*64 + blue*64 + green*64 + yellow*64 + orange*64 + red*64 + purple*64 + gray*64
+        num = 10
+        colors = black*512*(num-1) + (white*64 + blue*64 + green*64 + yellow*64 + orange*64 + red*64 + purple*64 + gray*64) + black*512*(10-num)
+#        print(colors)
+#        colors = red*5120
         
         print('clearing pixels')
         time.sleep(1)
         self.client.put_pixels(black*5120)
-        time.sleep(5)
+        time.sleep(1)
+        self.client.put_pixels(colors)
         
-        def rotate(l, n):
-            return l[-n:] + l[:-n]
-        
-        print('sending and rotating pixels')
-        i=0;
-        while True:
-            time.sleep(1/60)
-            self.client.put_pixels(rotate(colors,i%512))
-            i+=1
+#        def rotate(l, n):
+#            return l[-n:] + l[:-n]
+#        
+#        print('sending and rotating pixels')
+#        i=0;
+#        while True:
+#            time.sleep(1/60)
+#            self.client.put_pixels(colors)#rotate(colors,i%512*0))
+#            i+=1
 
-#if __name__ == '__main__':
-#    captureVideo()
+if __name__ == '__main__':
+    lb = LoveBug()
+    lb.test8()
