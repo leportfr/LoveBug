@@ -13,7 +13,7 @@ class LBViewer(QtGui.QWidget):
         self.frametimer = clock()
         
         self.lovebug = LoveBug(fullShell=False, framerate=framerate)
-        self.showlist = ['Hearts','Fire','Mandel','Triangles','Pineapples','Reactive Spots','Fast Rainbow']
+        self.showlist = ['Hearts','Fire','Mandel','Triangles','Pineapples','Bananas','Reactive Spots','Fast Rainbow','Snow','Rainbow Animals','Plants','Flowers']
         self.lightshow = self.showlist[0] #set default light show
         
         self.init_ui()
