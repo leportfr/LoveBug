@@ -17,6 +17,8 @@ class InputRecorder:
         self.has_new_audio = False
         self.setup()
         
+        self.xs = numpy.arange(self.BUFFERSIZE/2, dtype=float)
+        
     def setup(self):
         self.buffers_to_record = int(self.RATE * self.secToRecord / self.BUFFERSIZE)
         if self.buffers_to_record == 0:
@@ -82,7 +84,7 @@ class InputRecorder:
         ys = numpy.add(left, right[::-1])
         if log_scale:
             ys = numpy.multiply(20, numpy.log10(ys))
-        xs = numpy.arange(self.BUFFERSIZE/2, dtype=float)
+        xs = self.xs
         if trim_by:
             i = int((self.BUFFERSIZE/2) / trim_by)
             ys = ys[:i]

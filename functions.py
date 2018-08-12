@@ -3,7 +3,6 @@ import opc
 import cv2
 import numpy as np
 from numba import jit 
-from recorder import InputRecorder
 
 width = int(640)
 height = int(360)
@@ -20,7 +19,7 @@ def heartmanip(image, newimage, count, countnum):
 #        print([pixel[2],int(255*amt2) if int(255*amt2) > 0 else 0,int(amt*255-(pixel[2]))])
 
 class LoveBug():
-    def __init__(self, fullShell=False, framerate=15):
+    def __init__(self, input_recorder=None, fullShell=False, framerate=15):
         #open fadecandy client connection
         self.client = opc.Client('localhost:7890')
         
@@ -32,9 +31,10 @@ class LoveBug():
         self.loadVideoFile(shell=True, back=True, snout=True)
         self.video = True
         self.z = 0
+        self.totmax = 0
         
         #load audio recorder
-        self.input_recorder = InputRecorder()
+        self.input_recorder = input_recorder
 
         #load strip lens
         self.stripLens = np.loadtxt("./StripLens.csv",delimiter=',').astype(int)
@@ -57,6 +57,16 @@ class LoveBug():
             if back: self.vidcapBack = cv2.VideoCapture('../Movies_reduced/free-loops_Fire_3_reduce.mpeg')
             if snout: self.vidcapSnout = cv2.VideoCapture('../Movies_reduced/free-loops_Fire_3_reduce.mpeg')
             self.video = True
+        elif self.show == 'Bigger Fire':
+            if shell: self.vidcap = cv2.VideoCapture('../Movies_reduced/free-loops_Fire_5_reduce.mpeg')
+            if back: self.vidcapBack = cv2.VideoCapture('../Movies_reduced/free-loops_Fire_5_reduce.mpeg')
+            if snout: self.vidcapSnout = cv2.VideoCapture('../Movies_reduced/free-loops_Fire_5_reduce.mpeg')
+            self.video = True
+        elif self.show == 'Fire Glow':
+            if shell: self.vidcap = cv2.VideoCapture('../Movies_reduced/free-loops_Fire_Background_reduce.mpeg')
+            if back: self.vidcapBack = cv2.VideoCapture('../Movies_reduced/free-loops_Fire_Background_reduce.mpeg')
+            if snout: self.vidcapSnout = cv2.VideoCapture('../Movies_reduced/free-loops_Fire_Background_reduce.mpeg')
+            self.video = True
         elif self.show == 'Mandel':
             if shell: self.vidcap = cv2.VideoCapture('../Movies_reduced/mandelzoom2_reduce.mpeg')
             if back: self.vidcapBack = cv2.VideoCapture('../Movies_reduced/mandelzoom2_reduce.mpeg')
@@ -78,9 +88,24 @@ class LoveBug():
             if snout: self.vidcapSnout = cv2.VideoCapture('../Movies_reduced/free-loops_Textured_Bananas_reduce.mpeg')
             self.video = True
         elif self.show == 'Fast Rainbow':
-            if shell: self.vidcap = cv2.VideoCapture('../Movies_reduced/free-loops_Rainbow_Fishes_Kaleida_2_H264_reduce.mpeg')
-            if back: self.vidcapBack = cv2.VideoCapture('../Movies_reduced/free-loops_Rainbow_Fishes_Kaleida_2_H264_reduce.mpeg')
-            if snout: self.vidcapSnout = cv2.VideoCapture('../Movies_reduced/free-loops_Rainbow_Fishes_Kaleida_2_H264_reduce.mpeg')
+            if shell: self.vidcap = cv2.VideoCapture('../Movies_reduced/free-loops_Rainbow_Fishes_Frontal_Shine_H264_reduce.mpeg')
+            if back: self.vidcapBack = cv2.VideoCapture('../Movies_reduced/free-loops_Color_Exploder_4_H264_reduce.mpeg')
+            if snout: self.vidcapSnout = cv2.VideoCapture('../Movies_reduced/free-loops_Color_Exploder_4_H264_reduce.mpeg')
+            self.video = True
+        elif self.show == 'Rainbow Glow':
+            if shell: self.vidcap = cv2.VideoCapture('../Movies_reduced/free-loops_Spiritual_Particle_Background_3_reduce.mpeg')
+            if back: self.vidcapBack = cv2.VideoCapture('../Movies_reduced/free-loops_Spiritual_Particle_Background_3_reduce.mpeg')
+            if snout: self.vidcapSnout = cv2.VideoCapture('../Movies_reduced/free-loops_Spiritual_Particle_Background_3_reduce.mpeg')
+            self.video = True
+        elif self.show == 'Yellow Glow':
+            if shell: self.vidcap = cv2.VideoCapture('../Movies_reduced/free-loops_Spiritual_Particle_Background_5_reduce.mpeg')
+            if back: self.vidcapBack = cv2.VideoCapture('../Movies_reduced/free-loops_Spiritual_Particle_Background_5_reduce.mpeg')
+            if snout: self.vidcapSnout = cv2.VideoCapture('../Movies_reduced/free-loops_Spiritual_Particle_Background_5_reduce.mpeg')
+            self.video = True
+        elif self.show == 'Purple Glow':
+            if shell: self.vidcap = cv2.VideoCapture('../Movies_reduced/free-loops_Cosmic_Power_Rays_2_reduce.mpeg')
+            if back: self.vidcapBack = cv2.VideoCapture('../Movies_reduced/free-loops_Spiritual_Terrain_Background_2_reduce.mpeg')
+            if snout: self.vidcapSnout = cv2.VideoCapture('../Movies_reduced/free-loops_Spiritual_Terrain_Background_2_reduce.mpeg')
             self.video = True
         elif self.show == 'Snow':
             if shell: self.vidcap = cv2.VideoCapture('../Movies_reduced/free-loops_Snowflakes_Blue_Small_H264_reduce.mpeg')
@@ -101,6 +126,11 @@ class LoveBug():
             if shell: self.vidcap = cv2.VideoCapture('../Movies_reduced/free-loops_Flowers_Rain_2_H264_reduce.mpeg')
             if back: self.vidcapBack = cv2.VideoCapture('../Movies_reduced/free-loops_Spiritual_Particle_Background_5_reduce.mpeg')
             if snout: self.vidcapSnout = cv2.VideoCapture('../Movies_reduced/free-loops_Spiritual_Particle_Background_5_reduce.mpeg')
+            self.video = True
+        elif self.show == 'Sunrise':
+            if shell: self.vidcap = cv2.VideoCapture('../Movies_reduced/free-loops_Red_Planet_Sunrise_H264_reduce.mpeg')
+            if back: self.vidcapBack = cv2.VideoCapture('../Movies_reduced/free-loops_Outline_Triangles_reduce.mpeg')
+            if snout: self.vidcapSnout = cv2.VideoCapture('../Movies_reduced/free-loops_Outline_Triangles_reduce.mpeg')
             self.video = True
         elif self.show == 'Reactive Spots':
             self.video = False
@@ -129,14 +159,14 @@ class LoveBug():
             
     def getVideoFrame(self, show):
         #if show choice changes, fade out over the next second, then fade into the new show over the following second
-        if show != self.show:
-            self.switch = self.framerate*2
-            self.show = show
-            
+        if show != self.show and self.switch == 0:
+            self.switch = self.framerate*2    
+        
         if self.switch > 0:
             self.switch = self.switch - 1
         
         if self.switch == self.framerate:
+            self.show = show
             self.loadVideoFile(shell=True, back=True, snout=True)
         
         image = None
@@ -163,11 +193,11 @@ class LoveBug():
             self.input_recorder.record_once()
             xs, ys = self.input_recorder.fft()
             bassmax = np.max(ys[:4])
-            totmax = np.sum(ys)/len(ys)
-            zmax = 2*bassmax/totmax
-            self.z = self.z - 1 if self.z > 0 else 0
-            self.z = (np.amax((np.clip(zmax,0,30), self.z)) if totmax > 0 else 0) if zmax - 15 > self.z else self.z
-            print(zmax, round(self.z))
+            self.totmax = np.amax((np.mean(ys),self.totmax-2))
+            zmax = 2*bassmax/self.totmax
+            self.z = self.z - 1 if self.z > 1 else 0
+            self.z = (np.amax((np.clip(zmax,0,30), self.z)) if self.totmax > 0 else 0) if zmax - 3 > self.z else self.z
+            #print(self.totmax, zmax, round(self.z))
             image = cv2.imread("/Users/leportfr/Desktop/Lovebug/LEDs/Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
             image = cv2.resize(image,(width,height))
             imageBack = cv2.imread("/Users/leportfr/Desktop/Lovebug/LEDs/Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
@@ -240,17 +270,27 @@ class LoveBug():
 #            self.client.put_pixels(colors)#rotate(colors,i%512*0))
 #            i+=1
         
-    def reduceVideoFile(self, files, intensity=1.0):
+    def reduceVideoFile(self, files, intensity=1.0, huechange=0, slow=False, delay=0):
         vw = cv2.VideoWriter('../Movies_reduced/' + files[0] + '_reduce.mpeg',0,cv2.VideoWriter_fourcc(*'MPEG'),30,(width,height))
         
         for file in files:
+            count = 0
             vidcap = cv2.VideoCapture('../Movies/' + file + '.mp4')
-            success,image = vidcap.read()  
+            success,image = vidcap.read() 
+            
             while success:
-                image = np.array(image*intensity, dtype=np.uint8)
-                vw.write(cv2.resize(image,(width,height)))
-                vw.write(cv2.resize(image,(width,height)))
-                success,image = vidcap.read()       
+                if count > delay:
+                    image = np.array(image*intensity, dtype=np.uint8)
+                    
+                    if huechange != 0:
+                        hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+                        hsv[:,:,0] -= huechange
+                        image = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
+                    
+                    vw.write(cv2.resize(image,(width,height)))
+                    if slow: vw.write(cv2.resize(image,(width,height)))
+                success,image = vidcap.read()
+                count += 1
         
     def createHearts(self):
         file = 'free-loops_Color_Heart_Pop_Up_H264'
@@ -301,5 +341,8 @@ class LoveBug():
 if __name__ == '__main__':
     lb = LoveBug()
     
-    lb.reduceVideoFile(['free-loops_Textured_Bananas'],intensity=1)
+    lb.reduceVideoFile([''])
+#    lb.reduceVideoFile(['mandelzoom2'],delay=5*30)
+#    lb.reduceVideoFile(['free-loops_Spirit_Animals_Deer_H264','free-loops_Spirit_Animals_Elephant_H264','free-loops_Spirit_Animals_Lion_H264','free-loops_Spirit_Animals_Owl_H264'])
+#    lb.reduceVideoFile(['free-loops_Outline_Triangles'],intensity=0.5,huechange=12,slow=True)
 #    lb.createHearts()
