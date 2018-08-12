@@ -87,8 +87,8 @@ class LBViewer(QtGui.QWidget):
     
     def update(self):
 #        sleep(1/framerate - (clock()-self.frametimer) if (clock()-self.frametimer) < 1/framerate else 0)
-#        print('frame rate: ',1/(clock()-self.frametimer))
-#        self.frametimer=clock()
+        print('frame rate: ',1/(clock()-self.frametimer))
+        self.frametimer=clock()
         
         if self.cycle == 'Cycle': #except if 'cycle slow' is selected
             self.input_recorder.record_once() #then record some sound

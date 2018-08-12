@@ -18,6 +18,24 @@ def heartmanip(image, newimage, count, countnum):
             newimage[rownum,pixelnum] = ([pixel[2],0,int(amt*255-(pixel[2]))] if pixel[0]+pixel[2] < 255*amt else [pixel[2],0,pixel[0]])
 #        print([pixel[2],int(255*amt2) if int(255*amt2) > 0 else 0,int(amt*255-(pixel[2]))])
 
+@jit(nopython=True)
+def buildColors(colors, shell1Colors, shell2Colors, backflapColors, snoutColors, stripLens):
+    ledcount = 0
+    for i,strip in enumerate(stripLens):
+        if i<32:
+            colors[i*64:i*64 + strip] = shell1Colors[ledcount:ledcount+strip]
+        elif i<64:
+            if i == 32: ledcount=0
+            colors[i*64:i*64 + strip] = shell2Colors[ledcount:ledcount+strip]
+        elif i<70:
+            if i == 64: ledcount=0
+            colors[i*64:i*64 + strip] = backflapColors[ledcount:ledcount+strip]
+        else:
+            if i == 70: ledcount=0
+            colors[i*64:i*64 + strip] = snoutColors[ledcount:ledcount+strip]
+        
+        ledcount = ledcount + strip
+
 class LoveBug():
     def __init__(self, input_recorder=None, fullShell=False, framerate=15):
         #open fadecandy client connection
@@ -45,6 +63,9 @@ class LoveBug():
         self.backflap2d = np.loadtxt("./BackFlap2D.csv",delimiter=',').astype(int)
         self.snout2d = np.loadtxt("./Snout2D.csv",delimiter=',').astype(int)
         self.fullShell = fullShell
+        
+        #create color matrix for sending to LEDs
+        self.colors = np.zeros((5120,3))
         
     def loadVideoFile(self, shell=False, back=False, snout=False):
         if self.show == 'Hearts':
@@ -134,28 +155,13 @@ class LoveBug():
             self.video = True
         elif self.show == 'Reactive Spots':
             self.video = False
-             
+    
+         
     def sendVideoFrame(self, shell1Colors, shell2Colors, backflapColors, snoutColors, framerate=15):
-        colors = np.zeros((5120,3))
+        buildColors(self.colors, shell1Colors, shell2Colors, backflapColors, snoutColors, self.stripLens)
         
-        ledcount = 0
-        for i,strip in enumerate(self.stripLens):
-            if i<32:
-                colors[i*64:i*64 + strip] = shell1Colors[ledcount:ledcount+strip]
-            elif i<64:
-                if i == 32: ledcount=0
-                colors[i*64:i*64 + strip] = shell2Colors[ledcount:ledcount+strip]
-            elif i<70:
-                if i == 64: ledcount=0
-                colors[i*64:i*64 + strip] = backflapColors[ledcount:ledcount+strip]
-            else:
-                if i == 70: ledcount=0
-                colors[i*64:i*64 + strip] = snoutColors[ledcount:ledcount+strip]
-            
-            ledcount = ledcount + strip
-        
-        time.sleep(1/framerate)
-        self.client.put_pixels(colors)
+        time.sleep(1/framerate - 1/45)
+        self.client.put_pixels(self.colors)
             
     def getVideoFrame(self, show):
         #if show choice changes, fade out over the next second, then fade into the new show over the following second
@@ -198,11 +204,11 @@ class LoveBug():
             self.z = self.z - 1 if self.z > 1 else 0
             self.z = (np.amax((np.clip(zmax,0,30), self.z)) if self.totmax > 0 else 0) if zmax - 3 > self.z else self.z
             #print(self.totmax, zmax, round(self.z))
-            image = cv2.imread("/Users/leportfr/Desktop/Lovebug/LEDs/Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
+            image = cv2.imread("../Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
             image = cv2.resize(image,(width,height))
-            imageBack = cv2.imread("/Users/leportfr/Desktop/Lovebug/LEDs/Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
+            imageBack = cv2.imread("../Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
             imageBack = cv2.resize(imageBack,(width,height))
-            imageSnout= cv2.imread("/Users/leportfr/Desktop/Lovebug/LEDs/Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
+            imageSnout= cv2.imread("../Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
             imageSnout = cv2.resize(imageSnout,(width,height))
             
             sendframerate = self.reactframerate
@@ -341,7 +347,6 @@ class LoveBug():
 if __name__ == '__main__':
     lb = LoveBug()
     
-    lb.reduceVideoFile([''])
 #    lb.reduceVideoFile(['mandelzoom2'],delay=5*30)
 #    lb.reduceVideoFile(['free-loops_Spirit_Animals_Deer_H264','free-loops_Spirit_Animals_Elephant_H264','free-loops_Spirit_Animals_Lion_H264','free-loops_Spirit_Animals_Owl_H264'])
 #    lb.reduceVideoFile(['free-loops_Outline_Triangles'],intensity=0.5,huechange=12,slow=True)
