@@ -6,8 +6,10 @@ import numpy as np
 from recorder import InputRecorder
 
 class LBViewer(QtGui.QWidget):
-    def __init__(self):
+    def __init__(self, path):
         super(LBViewer,self).__init__()
+        
+        print('PATH PATH PATH',path)
         
         self.frametimer = clock()
         
@@ -15,7 +17,7 @@ class LBViewer(QtGui.QWidget):
         self.cycle = 'Cycle'
         self.cycle_means = 0
         
-        self.lovebug = LoveBug(input_recorder=self.input_recorder, fullShell=False, framerate=30)
+        self.lovebug = LoveBug(input_recorder=self.input_recorder, fullShell=False, framerate=30, path=('../' if len(path) == 1 else path[1]))
         self.showlist = ['Hearts','Mandel','Triangles','Rainbow Glow','Fire Glow','Yellow Glow',
                          'Purple Glow','Snow','Rainbow Animals','Plants','Flowers','Sunrise','Fire','Bigger Fire',
                          'Fast Rainbow','Pineapples','Bananas','Reactive Spots']
@@ -107,5 +109,5 @@ if __name__ == '__main__':
     
     app = QtGui.QApplication([])
     app.setApplicationName('Love Bug')
-    ex = LBViewer()
+    ex = LBViewer(sys.argv)
     sys.exit(app.exec_())
