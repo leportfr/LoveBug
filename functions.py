@@ -257,24 +257,12 @@ class LoveBug():
         print('building pixels')
         num = 10
         colors = black*512*(num-1) + (white*64 + blue*64 + green*64 + yellow*64 + orange*64 + red*64 + purple*64 + gray*64) + black*512*(10-num)
-#        print(colors)
-#        colors = red*5120
         
         print('clearing pixels')
         time.sleep(1)
         self.client.put_pixels(black*5120)
         time.sleep(1)
         self.client.put_pixels(colors)
-        
-#        def rotate(l, n):
-#            return l[-n:] + l[:-n]
-#        
-#        print('sending and rotating pixels')
-#        i=0;
-#        while True:
-#            time.sleep(1/60)
-#            self.client.put_pixels(colors)#rotate(colors,i%512*0))
-#            i+=1
         
     def reduceVideoFile(self, files, intensity=1.0, huechange=0, slow=False, delay=0):
         vw = cv2.VideoWriter('../Movies_reduced/' + files[0] + '_reduce.mpeg',0,cv2.VideoWriter_fourcc(*'MPEG'),30,(width,height))
