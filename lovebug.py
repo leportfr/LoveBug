@@ -17,7 +17,8 @@ class LBViewer(QtGui.QWidget):
         self.cycle = 'Cycle'
         self.cycle_means = 0
         
-        self.lovebug = LoveBug(input_recorder=self.input_recorder, fullShell=False, framerate=30, path=('../' if len(path) == 1 else path[1]))
+        self.framerate = 30
+        self.lovebug = LoveBug(input_recorder=self.input_recorder, fullShell=False, framerate=self.framerate, path=('../' if len(path) == 1 else path[1]))
         self.showlist = ['Hearts','Mandel','Triangles','Rainbow Glow','Fire Glow','Yellow Glow',
                          'Purple Glow','Snow','Rainbow Animals','Plants','Flowers','Sunrise','Fire','Bigger Fire',
                          'Fast Rainbow','Pineapples','Bananas','Reactive Spots']
@@ -41,12 +42,12 @@ class LBViewer(QtGui.QWidget):
         self.setLayout(vbox)
 
         self.view = gl.GLViewWidget()
-        self.view.setGeometry(0, 0, 1280, 1000)
-        self.view.opts['distance'] = 450
+        #self.view.setGeometry(0, 0, 1280, 820)
+        self.view.opts['distance'] = 850
         self.view.opts['elevation'] = 10
         self.view.opts['azimuth'] = 30
         self.view.opts['fov'] = 90
-        self.view.opts['viewport'] = [-750,-625,3000,2000]
+        self.view.opts['viewport'] = [-475,-345,1500,1000]
         vbox.addWidget(self.view)
         
         hbox = QtGui.QHBoxLayout()
@@ -54,7 +55,9 @@ class LBViewer(QtGui.QWidget):
         
         self.ShowSelect = QtGui.QComboBox(self)
         for selection in self.showlist:
+            if selection == 'Pineapples': self.ShowSelect.insertSeparator(1000)
             self.ShowSelect.addItem(selection)
+        self.ShowSelect.setMaxVisibleItems(100)
             
         self.SpeedSelect = QtGui.QComboBox(self)
         self.SpeedSelect.addItem('15 FPS')
@@ -70,7 +73,7 @@ class LBViewer(QtGui.QWidget):
         hbox.addWidget(self.SpeedSelect)
         hbox.addWidget(self.CycleSelect)
 
-        self.setGeometry(0, 0, 1280, 720)
+        self.setGeometry(0, 0, 600, 400)
         self.show()
         
     def qt_connections(self):
@@ -82,24 +85,31 @@ class LBViewer(QtGui.QWidget):
         self.lightshow = text
         
     def speed_choice(self, val):
-        self.lovebug.framerate = (val+1)*15
+        self.framerate = (val+1)*15
+        self.lovebug.framerate = self.framerate
             
     def cycle_choice(self, text):
         self.cycle = text
     
     def update(self):
 #        sleep(1/framerate - (clock()-self.frametimer) if (clock()-self.frametimer) < 1/framerate else 0)
-        print('frame rate: ',1/(clock()-self.frametimer))
+#        print('frame rate: ',1/(clock()-self.frametimer))
         self.frametimer=clock()
         
         if self.cycle == 'Cycle': #except if 'cycle slow' is selected
-            self.input_recorder.record_once() #then record some sound
-            xs, ys = self.input_recorder.fft()
-            self.cycle_means = self.cycle_means + 1 if np.mean(ys) < 10 else 0
-            if self.cycle_means == 10: #and look for a pause, to determine song change, then cycle
-                shownum = np.random.randint(0,self.numCycle)
-                self.ShowSelect.setCurrentIndex(shownum)
-                self.lightshow = self.showlist[shownum]
+            try: 
+                self.input_recorder.record_once() #then record some sound 
+                xs, ys = self.input_recorder.fft()
+                self.cycle_means = self.cycle_means + 1 if np.mean(ys) < 5 else 0
+                print(np.mean(ys), self.cycle_means)
+                if self.cycle_means == 3*self.framerate: #and look for a 3-sec pause, to determine song change, then cycle
+                    shownum = np.random.randint(0,self.numCycle)
+                    self.ShowSelect.setCurrentIndex(shownum)
+                    self.lightshow = self.showlist[shownum]
+            except:
+                print('audio error, will try again')
+                self.input_recorder.close()
+                self.input_recorder = InputRecorder()
                 
         color = self.lovebug.getVideoFrame(self.lightshow)
         self.shell.setData(color = color/255)
