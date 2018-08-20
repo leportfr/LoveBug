@@ -101,7 +101,7 @@ class LBViewer(QtGui.QWidget):
                 self.input_recorder.record_once() #then record some sound 
                 xs, ys = self.input_recorder.fft()
                 self.cycle_means = self.cycle_means + 1 if np.mean(ys) < 5 else 0
-                print(np.mean(ys), self.cycle_means)
+#                print(np.mean(ys), self.cycle_means)
                 if self.cycle_means == 3*self.framerate: #and look for a 3-sec pause, to determine song change, then cycle
                     shownum = np.random.randint(0,self.numCycle)
                     self.ShowSelect.setCurrentIndex(shownum)
