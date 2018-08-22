@@ -156,6 +156,26 @@ class LoveBug():
             if back: self.vidcapBack = cv2.VideoCapture(self.path+'Movies_reduced/free-loops_Outline_Triangles_reduce.mpeg')
             if snout: self.vidcapSnout = cv2.VideoCapture(self.path+'Movies_reduced/free-loops_Outline_Triangles_reduce.mpeg')
             self.video = True
+        elif self.show == 'Fireworks':
+            if shell: self.vidcap = cv2.VideoCapture(self.path+'Movies_reduced/free-loops_Fireworks_1_reduce.mpeg')
+            if back: self.vidcapBack = cv2.VideoCapture(self.path+'Movies_reduced/free-loops_Fireworks_Blue_and_Green_reduce.mpeg')
+            if snout: self.vidcapSnout = cv2.VideoCapture(self.path+'Movies_reduced/free-loops_Fireworks_Blue_and_Green_reduce.mpeg')
+            self.video = True
+        elif self.show == 'Water':
+            if shell: self.vidcap = cv2.VideoCapture(self.path+'Movies_reduced/Silky_Blue_4K_Motion_Background_Loop_reduce.mpeg')
+            if back: self.vidcapBack = cv2.VideoCapture(self.path+'Movies_reduced/Silky_Blue_4K_Motion_Background_Loop_reduce.mpeg')
+            if snout: self.vidcapSnout = cv2.VideoCapture(self.path+'Movies_reduced/Silky_Blue_4K_Motion_Background_Loop_reduce.mpeg')
+            self.video = True
+        elif self.show == 'Rainbow Galaxy':
+            if shell: self.vidcap = cv2.VideoCapture(self.path+'Movies_reduced/Galaxy_Storm_4K_Motion_Background_Loop_reduce.mpeg')
+            if back: self.vidcapBack = cv2.VideoCapture(self.path+'Movies_reduced/Galaxy_Storm_4K_Motion_Background_Loop_reduce.mpeg')
+            if snout: self.vidcapSnout = cv2.VideoCapture(self.path+'Movies_reduced/Galaxy_Storm_4K_Motion_Background_Loop_reduce.mpeg')
+            self.video = True
+        elif self.show == 'Rainbow Molecule':
+            if shell: self.vidcap = cv2.VideoCapture(self.path+'Movies_reduced/Molecular_Plex_4K_Motion_Background_Loop_reduce.mpeg')
+            if back: self.vidcapBack = cv2.VideoCapture(self.path+'Movies_reduced/Molecular_Plex_4K_Motion_Background_Loop_reduce.mpeg')
+            if snout: self.vidcapSnout = cv2.VideoCapture(self.path+'Movies_reduced/Molecular_Plex_4K_Motion_Background_Loop_reduce.mpeg')
+            self.video = True
         elif self.show == 'Reactive Spots':
             self.video = False
     
@@ -267,7 +287,7 @@ class LoveBug():
         time.sleep(1)
         self.client.put_pixels(colors)
         
-    def reduceVideoFile(self, files, intensity=1.0, huechange=0, slow=False, delay=0):
+    def reduceVideoFile(self, files, intensity=1.0, huechange=0, satchange=0, slow=False, delay=0):
         vw = cv2.VideoWriter(self.path+'Movies_reduced/' + files[0] + '_reduce.mpeg',0,cv2.VideoWriter_fourcc(*'MPEG'),30,(width,height))
         
         for file in files:
@@ -279,9 +299,10 @@ class LoveBug():
                 if count > delay:
                     image = np.array(image*intensity, dtype=np.uint8)
                     
-                    if huechange != 0:
+                    if huechange != 0 or satchange != 0:
                         hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
                         hsv[:,:,0] -= huechange
+                        hsv[:,:,1] += satchange
                         image = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
                     
                     vw.write(cv2.resize(image,(width,height)))
@@ -337,7 +358,10 @@ class LoveBug():
             
 if __name__ == '__main__':
     lb = LoveBug()
-    
+
+    lb.reduceVideoFile(['Molecular_Plex_4K_Motion_Background_Loop'], satchange=20)
+#    lb.reduceVideoFile(['Galaxy_Storm_4K_Motion_Background_Loop'], satchange=50)    
+#    lb.reduceVideoFile(['Silky_Blue_4K_Motion_Background_Loop'], satchange=50)
 #    lb.reduceVideoFile(['mandelzoom2'],delay=5*30)
 #    lb.reduceVideoFile(['free-loops_Spirit_Animals_Deer_H264','free-loops_Spirit_Animals_Elephant_H264','free-loops_Spirit_Animals_Lion_H264','free-loops_Spirit_Animals_Owl_H264'])
 #    lb.reduceVideoFile(['free-loops_Outline_Triangles'],intensity=0.5,huechange=12,slow=True)

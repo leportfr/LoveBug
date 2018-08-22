@@ -19,10 +19,10 @@ class LBViewer(QtGui.QWidget):
         
         self.framerate = 30
         self.lovebug = LoveBug(input_recorder=self.input_recorder, fullShell=False, framerate=self.framerate, path=('../' if len(path) == 1 else path[1]))
-        self.showlist = ['Hearts','Mandel','Triangles','Rainbow Glow','Fire Glow','Yellow Glow',
-                         'Purple Glow','Snow','Rainbow Animals','Plants','Flowers','Sunrise','Fire','Bigger Fire',
+        self.showlist = ['Hearts','Mandel','Triangles','Rainbow Galaxy','Rainbow Molecule','Rainbow Glow','Fire Glow','Yellow Glow',
+                         'Purple Glow','Snow','Water','Rainbow Animals','Fireworks','Flowers','Sunrise','Fire','Bigger Fire',
                          'Fast Rainbow','Pineapples','Bananas','Reactive Spots']
-        self.numCycle = 15
+        self.numCycle = 18
         self.lightshow = self.showlist[0] #set default light show
         
         self.init_ui()
@@ -100,9 +100,9 @@ class LBViewer(QtGui.QWidget):
             try: 
                 self.input_recorder.record_once() #then record some sound 
                 xs, ys = self.input_recorder.fft()
-                self.cycle_means = self.cycle_means + 1 if np.mean(ys) < 5 else 0
-#                print(np.mean(ys), self.cycle_means)
-                if self.cycle_means == 3*self.framerate: #and look for a 3-sec pause, to determine song change, then cycle
+                self.cycle_means = self.cycle_means + 1 if np.mean(ys) < 10 else 0
+                print(np.mean(ys), self.cycle_means)
+                if self.cycle_means == 0.5*self.framerate: #and look for a 3-sec pause, to determine song change, then cycle
                     shownum = np.random.randint(0,self.numCycle)
                     self.ShowSelect.setCurrentIndex(shownum)
                     self.lightshow = self.showlist[shownum]
