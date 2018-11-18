@@ -39,28 +39,28 @@
         },
 	{
 	    "type": "fadecandy",
-	    "serial": "ZNIRKYNDNXDNVTIR",
+	    "serial": "VLANGMIYVRTLPTQN",
             "map": [
                 [ 0, 2048, 0, 512, "rgb"]
             ]
         },
 	{
 	    "type": "fadecandy",
-	    "serial": "CAWMFPEIWYDDBPUT",
+	    "serial": "RRBBMMLRGCLVBFGN",
             "map": [
                 [ 0, 2560, 0, 512, "rgb"]
             ]
         },
 	{
 	    "type": "fadecandy",
-	    "serial": "RRBBMMLRGCLVBFGN",
+	    "serial": "CAWMFPEIWYDDBPUT",
             "map": [
                 [ 0, 3072, 0, 512, "rgb"]
             ]
         },
 	{
 	    "type": "fadecandy",
-	    "serial": "VLANGMIYVRTLPTQN",
+	    "serial": "ZNIRKYNDNXDNVTIR",
             "map": [
                 [ 0, 3584, 0, 512, "rgb"]
             ]

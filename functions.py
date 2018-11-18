@@ -7,7 +7,7 @@ from numba import jit
 width = int(640)
 height = int(360)
 
-@jit(nopython=True)
+#@jit(nopython=True)
 def heartmanip(image, newimage, count, countnum):
     for rownum in range(len(image)):
         pixelnum = 0
@@ -18,23 +18,28 @@ def heartmanip(image, newimage, count, countnum):
             newimage[rownum,pixelnum] = ([pixel[2],0,int(amt*255-(pixel[2]))] if pixel[0]+pixel[2] < 255*amt else [pixel[2],0,pixel[0]])
 #        print([pixel[2],int(255*amt2) if int(255*amt2) > 0 else 0,int(amt*255-(pixel[2]))])
 
-@jit(nopython=True)
-def buildColors(colors, shell1Colors, shell2Colors, backflapColors, snoutColors, stripLens):
-    ledcount = 0
+#@jit(nopython=True)
+def buildColors(shell1Colors, shell2Colors, backflapColors, snoutColors, stripLens):
+    ledcount = 0   
+    colors = np.zeros((5120,3))
+    
     for i,strip in enumerate(stripLens):
         if i<32:
             colors[i*64:i*64 + strip] = shell1Colors[ledcount:ledcount+strip]
-        elif i<64:
+        elif 32<=i<64:
             if i == 32: ledcount=0
             colors[i*64:i*64 + strip] = shell2Colors[ledcount:ledcount+strip]
-        elif i<70:
+        elif 64<=i<69:
             if i == 64: ledcount=0
-            colors[i*64:i*64 + strip] = backflapColors[ledcount:ledcount+strip]
-        else:
-            if i == 70: ledcount=0
             colors[i*64:i*64 + strip] = snoutColors[ledcount:ledcount+strip]
+        elif 72<=i:
+            if i == 72: ledcount=0
+            colors[i*64:i*64 + strip] = backflapColors[ledcount:ledcount+strip]
+        
         
         ledcount = ledcount + strip
+        
+    return colors
 
 class LoveBug():
     def __init__(self, input_recorder=None, fullShell=False, framerate=15, path='../'):
@@ -62,13 +67,13 @@ class LoveBug():
 
         #load 2d point mapping
         self.shellPoints2d = np.loadtxt(self.path+"LoveBug/LED2DPoints.csv",delimiter=',').astype(int)
-        self.shellPpoints2d2 = np.loadtxt(self.path+"LoveBug/LED2DPoints2.csv",delimiter=',').astype(int)
+        self.shellPoints2d2 = np.loadtxt(self.path+"LoveBug/LED2DPoints2.csv",delimiter=',').astype(int)
         self.backflap2d = np.loadtxt(self.path+"LoveBug/BackFlap2D.csv",delimiter=',').astype(int)
         self.snout2d = np.loadtxt(self.path+"LoveBug/Snout2D.csv",delimiter=',').astype(int)
         self.fullShell = fullShell
         
         #create color matrix for sending to LEDs
-        self.colors = np.zeros((5120,3))
+#        self.colors = np.zeros((5120,3))
         
     def loadVideoFile(self, shell=False, back=False, snout=False):
         if self.show == 'Hearts':
@@ -181,10 +186,10 @@ class LoveBug():
     
          
     def sendVideoFrame(self, shell1Colors, shell2Colors, backflapColors, snoutColors, framerate=15):
-        buildColors(self.colors, shell1Colors, shell2Colors, backflapColors, snoutColors, self.stripLens)
+        colors = buildColors(shell1Colors, shell2Colors, backflapColors, snoutColors, self.stripLens)
         
         time.sleep(1/framerate - 1/45)
-        self.client.put_pixels(self.colors)
+        self.client.put_pixels(colors)
             
     def getVideoFrame(self, show):
         #if show choice changes, fade out over the next second, then fade into the new show over the following second
@@ -219,22 +224,31 @@ class LoveBug():
                 
             sendframerate = self.framerate
         else:
-            self.input_recorder.record_once()
-            xs, ys = self.input_recorder.fft()
-            bassmax = np.max(ys[:4])
-            self.totmax = np.amax((np.mean(ys),self.totmax-2))
-            zmax = 2*bassmax/self.totmax
-            self.z = self.z - 1 if self.z > 1 else 0
-            self.z = (np.amax((np.clip(zmax,0,30), self.z)) if self.totmax > 0 else 0) if zmax - 3 > self.z else self.z
-            #print(self.totmax, zmax, round(self.z))
-            image = cv2.imread("../Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
+#            self.input_recorder.record_once()
+#            xs, ys = self.input_recorder.fft()
+#            bassmax = np.max(ys[:4])
+#            self.totmax = np.amax((np.mean(ys),self.totmax-2))
+#            zmax = 2*bassmax/self.totmax
+#            self.z = self.z - 1 if self.z > 1 else 0
+#            self.z = (np.amax((np.clip(zmax,0,30), self.z)) if self.totmax > 0 else 0) if zmax - 3 > self.z else self.z
+#            #print(self.totmax, zmax, round(self.z))
+#            image = cv2.imread("../Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
+#            image = cv2.resize(image,(width,height))
+#            imageBack = cv2.imread("../Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
+#            imageBack = cv2.resize(imageBack,(width,height))
+#            imageSnout= cv2.imread("../Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
+#            imageSnout = cv2.resize(imageSnout,(width,height))
+            
+            image = cv2.imread(self.path+"Movies_reduced/heartpic.png")
+#            print('hi',image)
             image = cv2.resize(image,(width,height))
-            imageBack = cv2.imread("../Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
+            imageBack = cv2.imread(self.path+"Movies_reduced/heartpic.png")
             imageBack = cv2.resize(imageBack,(width,height))
-            imageSnout= cv2.imread("../Movies_reduced/ladybug spots/ladybug" + str(int(round(self.z))) + ".jpg")
+            imageSnout= cv2.imread(self.path+"Movies_reduced/heartpic.png")
             imageSnout = cv2.resize(imageSnout,(width,height))
             
-            sendframerate = self.reactframerate
+#            sendframerate = self.reactframerate
+            sendframerate = self.framerate
         
         #flip and resize images
         image = np.flip(image,axis=2)
@@ -242,9 +256,17 @@ class LoveBug():
         imageSnout = np.flip(imageSnout,axis=2)
         
         shell1Colors = image.reshape([height*width,3])[self.shellPoints2d]
-        shell2Colors = image.reshape([height*width,3])[self.shellPpoints2d2]
+#        print('shellpoints2d',self.shellPoints2d.shape,'shell1colors',shell1Colors.shape)
+        shell2Colors = image.reshape([height*width,3])[self.shellPoints2d2]
         backflapColors = imageBack.reshape([height*width,3])[self.backflap2d]
         snoutColors = imageSnout.reshape([height*width,3])[self.snout2d]
+        
+#        print(np.amax(shell1Colors))
+        
+        shell1Colors = shell1Colors * 255.0/(np.amax(shell1Colors) if np.amax(shell1Colors) > 0 else 255.0) 
+        shell2Colors = shell2Colors * 255.0/(np.amax(shell2Colors) if np.amax(shell2Colors) > 0 else 255.0) 
+        backflapColors = backflapColors * 255.0/(np.amax(backflapColors) if np.amax(backflapColors) > 0 else 255.0) 
+        snoutColors = snoutColors * 255.0/(np.amax(snoutColors) if np.amax(snoutColors) > 0 else 255.0) 
         
         #send color values to LEDs
         self.sendVideoFrame(shell1Colors, shell2Colors, backflapColors, snoutColors, framerate=sendframerate)
@@ -280,7 +302,7 @@ class LoveBug():
         print('building pixels')
         num = 10
         colors = black*512*(num-1) + (white*64 + blue*64 + green*64 + yellow*64 + orange*64 + red*64 + purple*64 + gray*64) + black*512*(10-num)
-        
+#        colors = (white*64 + blue*64 + green*64 + yellow*64 + orange*64 + red*64 + purple*64 + gray*64)*8        
         print('clearing pixels')
         time.sleep(1)
         self.client.put_pixels(black*5120)
@@ -358,8 +380,10 @@ class LoveBug():
             
 if __name__ == '__main__':
     lb = LoveBug()
+    
+    lb.test8()
 
-    lb.reduceVideoFile(['Molecular_Plex_4K_Motion_Background_Loop'], satchange=20)
+#    lb.reduceVideoFile(['Molecular_Plex_4K_Motion_Background_Loop'], satchange=20)
 #    lb.reduceVideoFile(['Galaxy_Storm_4K_Motion_Background_Loop'], satchange=50)    
 #    lb.reduceVideoFile(['Silky_Blue_4K_Motion_Background_Loop'], satchange=50)
 #    lb.reduceVideoFile(['mandelzoom2'],delay=5*30)
